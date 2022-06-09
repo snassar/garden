@@ -86,7 +86,6 @@ export class TestTask extends BaseTask {
     this.localModeServiceNames = localModeServiceNames
     this.silent = silent
     this.interactive = interactive
-    this.validate()
   }
 
   async resolveDependencies() {
