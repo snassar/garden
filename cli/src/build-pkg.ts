@@ -240,8 +240,8 @@ async function pkgCommon({
 
   console.log(` - ${targetName} -> pkg`)
   await exec(pkgPath, [
-    "--target",
     "-d",
+    "--target",
     pkgType,
     sourcePath,
     "--public",
