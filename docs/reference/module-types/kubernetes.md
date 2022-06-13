@@ -253,7 +253,7 @@ localMode:
     # Max number of the local application restarts. Unlimited by default.
     max: .inf
 
-  # The k8s name of the remote container (optional).
+  # The k8s name of the target remote container.
   containerName:
 
 # POSIX-style paths to YAML files to load manifests from. Each can contain multiple manifests, and can include any
@@ -1083,7 +1083,7 @@ Max number of the local application restarts. Unlimited by default.
 
 [localMode](#localmode) > containerName
 
-The k8s name of the remote container (optional).
+The k8s name of the target remote container.
 
 | Type     | Required |
 | -------- | -------- |

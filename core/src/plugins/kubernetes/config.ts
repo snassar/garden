@@ -108,7 +108,7 @@ export interface KubernetesLocalModeSpec extends ContainerLocalModeSpec {
 
 export const kubernetesLocalModeSchema = () =>
   containerLocalModeSchema().keys({
-    containerName: joi.string().optional().description("The k8s name of the remote container (optional)."),
+    containerName: joi.string().optional().description("The k8s name of the target remote container."),
   }).description(dedent`
     Specifies necessary configuration details of the local application which will replace a target remote service.
 

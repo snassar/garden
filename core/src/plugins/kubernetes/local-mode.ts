@@ -35,6 +35,8 @@ import { isConfiguredForLocalMode } from "./status/status"
 import { exec, registerCleanupFunction, shutdown } from "../../util/util"
 import getPort = require("get-port")
 import touch = require("touch")
+import { KubernetesService, KubernetesServiceSpec } from "./kubernetes-module/config"
+import { HelmService, HelmServiceSpec } from "./helm/config"
 
 export const localModeGuideLink = "https://docs.garden.io/guides/running-service-in-local-mode.md"
 
@@ -45,12 +47,16 @@ const sshKeystoreAsyncLock = new AsyncLock()
 
 const portForwardRetryTimeoutMs = 5000
 
+export type LocalModeCompatibleService = ContainerService | KubernetesService | HelmService
+export type LocalModeCompatibleServiceSpec = ContainerServiceSpec | KubernetesServiceSpec | HelmServiceSpec
+
 interface ConfigureLocalModeParams {
   ctx: PluginContext
   target: HotReloadableResource
   spec: ContainerLocalModeSpec
-  service: ContainerService
+  service: LocalModeCompatibleService
   log: LogEntry
+  containerName?: string
 }
 
 interface StartLocalModeParams extends ConfigureLocalModeParams {
@@ -153,7 +159,7 @@ export class ProxySshKeystore {
     }
   }
 
-  public async getKeyPair(gardenDirPath: string, service: ContainerService, log: LogEntry): Promise<KeyPair> {
+  public async getKeyPair(gardenDirPath: string, service: LocalModeCompatibleService, log: LogEntry): Promise<KeyPair> {
     const sshDirPath = ProxySshKeystore.getSshDirPath(gardenDirPath)
     const sshKeyName = service.name
 
@@ -258,7 +264,7 @@ async function prepareLocalModeEnvVars({ service }: ConfigureLocalModeParams, ke
   const originalServiceSpec = service.spec
 
   // todo: expose all original ports in the proxy container
-  const portSpec = findFirstForwardablePort(originalServiceSpec)
+  const portSpec = findFirstForwardablePort(<ContainerServiceSpec>originalServiceSpec)
   const publicSshKey = await keyPair.readPublicSshKey()
 
   return {
@@ -381,7 +387,7 @@ export async function configureLocalMode(configParams: ConfigureLocalModeParams)
   const localModeEnvVars = await prepareLocalModeEnvVars(configParams, keyPair)
   const localModePorts = prepareLocalModePorts()
 
-  patchOriginalServiceSpec(service.spec, localModeEnvVars, localModePorts)
+  patchOriginalServiceSpec(<ContainerServiceSpec>service.spec, localModeEnvVars, localModePorts)
   patchMainContainer(mainContainer, proxyContainerName, localModeEnvVars, localModePorts)
 }
 
@@ -572,7 +578,7 @@ async function getReversePortForwardCommand(
 ): Promise<OsCommand> {
   const localPort = localModeSpec.localPort
   // todo: get all forwardable ports and set up ssh tunnels for all
-  const remoteContainerPortSpec = findFirstForwardablePort(service.spec)
+  const remoteContainerPortSpec = findFirstForwardablePort(<ContainerServiceSpec>service.spec)
   const remoteContainerPort = remoteContainerPortSpec.containerPort
   const keyPair = await ProxySshKeystore.getInstance(log).getKeyPair(ctx.gardenDirPath, service, log)
   const knownHostsFilePath = await ProxySshKeystore.getInstance(log).getKnownHostsFile(ctx.gardenDirPath)
