@@ -1006,7 +1006,7 @@ workflows:
       - test-microk8s:
           name: vm-1.24-microk8s
           requires: [build]
-          kubernetesVersion: "v1.24"
+          kubernetesVersion: "1.24"
       - test-kind:
           name: vm-1.19-kind
           requires: [build]
