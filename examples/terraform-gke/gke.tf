@@ -1,16 +1,16 @@
 variable "gcp_project_id" {
-  type        = "string"
+  type        = string
   description = "The project ID where we'll create the GKE cluster and related resources."
 }
 
 variable "gcp_region" {
-  type        = "string"
+  type        = string
   description = "The region where we'll create your resources (e.g. us-central1)."
   default     = "europe-west1"
 }
 
 variable "gcp_zone" {
-  type        = "string"
+  type        = string
   description = "The zone where we'll create your resources (e.g. us-central1-b)."
   default     = "europe-west1-b"
 }
@@ -59,7 +59,7 @@ resource "google_container_cluster" "primary" {
   }
 
   provisioner "local-exec" {
-    when    = "destroy"
+    when    = destroy
     command = "sleep 90"
   }
 }
