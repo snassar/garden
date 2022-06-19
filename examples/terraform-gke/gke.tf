@@ -1,19 +1,29 @@
 variable "gcp_project_id" {
-  type        = "string"
+  type        = string
   description = "The project ID where we'll create the GKE cluster and related resources."
 }
 
 variable "gcp_region" {
-  type        = "string"
+  type        = string
   description = "The region where we'll create your resources (e.g. us-central1)."
   default     = "europe-west1"
 }
 
 variable "gcp_zone" {
-  type        = "string"
+  type        = string
   description = "The zone where we'll create your resources (e.g. us-central1-b)."
   default     = "europe-west1-b"
 }
+
+resource "google_artifact_registry_repository" "container-repository" {
+  provider = google-beta
+
+  location = "europe-west1"
+  repository_id = "dev-repository"
+  description = "dev docker repository"
+  format = "DOCKER"
+}
+
 data "google_client_config" "current" {}
 
 variable "gcp_network_name" {
@@ -25,6 +35,13 @@ provider "google" {
   region  = "${var.gcp_region}"
   zone    = "${var.gcp_zone}"
 }
+
+provider "google-beta" {
+  project = "${var.gcp_project_id}"
+  region  = "${var.gcp_region}"
+  zone    = "${var.gcp_zone}"
+}
+
 resource "google_compute_network" "default" {
   name                    = "${var.gcp_network_name}"
   auto_create_subnetworks = false
@@ -59,7 +76,7 @@ resource "google_container_cluster" "primary" {
   }
 
   provisioner "local-exec" {
-    when    = "destroy"
+    when    = destroy
     command = "sleep 90"
   }
 }
