@@ -1,16 +1,27 @@
 kind: Project
 name: terraform-gke
+variables:
+  gcp_region: "europe-west1"
+  gcp_project_id: "your-fine-gcp-project"
+  myHostname: "dev.example.com"
+environments:
+  - name: dev
+    defaultNamespace: dev-${local.username}
 providers:
   - name: terraform
-    # This must be set to indicate that there is a stack in the project root.
     initRoot: "."
-    # You can either uncomment and replace these with your own values, or provide the values in a
-    # terraform.tfvars file in the project root.
-    # variables:
-    #   gcp_project_id: garden-gke-tf-${local.username}
-    #   gcp_region: europe-west1
+    version: null
+    variables:
+      gcp_region: ${var.gcp_region}
+      gcp_project_id: ${var.gcp_project_id}
   - name: kubernetes
+    setupIngressController: nginx
+    ingressClass: nginx
     kubeconfig: ${providers.terraform.outputs.kubeconfig_path}
     context: gke
-    defaultHostname: terraform-gke-${local.username}.dev-2.sys.garden
-    buildMode: kaniko
+    defaultHostname: ${local.username}.${var.myHostname}
+    buildMode: local-docker
+    environments: ["dev"]
+    deploymentRegistry:
+      hostname: europe-west1-docker.pkg.dev
+      namespace: ${var.gcp_project_id}/dev-repository
