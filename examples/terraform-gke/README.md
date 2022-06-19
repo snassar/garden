@@ -41,7 +41,15 @@ gcp_project_id = "my-test-project"
 
 **B)** Configure the variables directly in the project `garden.yml` (see the `terraform` provider section).
 
-### Step 4 - Initialize the cluster
+### Step 4 - Terraform your project
+
+This will create the kubernetes cluster, the networking, and the artifact registry necessary for the development.
+
+```sh
+garden plugins terraform apply-root
+```
+
+### Step 5 - Initialize the cluster
 
 Install the cluster-wide services Garden needs by running:
 
@@ -51,7 +59,7 @@ garden plugins kubernetes cluster-init
 
 This will take a while because the cluster needs to be provisioned, and some services installed when it's ready.
 
-### Step 5 - Deploy your services
+### Step 6 - Deploy your services
 
 Finally, to build and deploy your services to your new GKE cluster, run:
 
